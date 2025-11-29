@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Konversi Satuan Jarak</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Konverter Satuan Jarak</h1>
+            <p>Konversi berbagai satuan jarak dengan mudah</p>
+        </header>
+
+        <div class="converter-card">
+            <div class="input-group">
+                <div class="input-field">
+                    <label for="value">Nilai:</label>
+                    <input type="number" id="value" step="any" placeholder="Masukkan angka" value="100">
+                </div>
+
+                <div class="select-group">
+                    <div class="select-field">
+                        <label for="from_unit">Dari Satuan:</label>
+                        <select id="from_unit">
+                            <option value="mm">Milimeter (mm)</option>
+                            <option value="cm" selected>Centimeter (cm)</option>
+                            <option value="m">Meter (m)</option>
+                            <option value="km">Kilometer (km)</option>
+                            <option value="in">Inchi (in)</option>
+                            <option value="ft">Kaki (ft)</option>
+                            <option value="yd">Yard (yd)</option>
+                            <option value="mi">Mil (mi)</option>
+                        </select>
+                    </div>
+
+                    <div class="swap-button">
+                        <button type="button" id="swapUnits">⇄</button>
+                    </div>
+
+                    <div class="select-field">
+                        <label for="to_unit">Ke Satuan:</label>
+                        <select id="to_unit">
+                            <option value="mm">Milimeter (mm)</option>
+                            <option value="cm">Centimeter (cm)</option>
+                            <option value="m" selected>Meter (m)</option>
+                            <option value="km">Kilometer (km)</option>
+                            <option value="in">Inchi (in)</option>
+                            <option value="ft">Kaki (ft)</option>
+                            <option value="yd">Yard (yd)</option>
+                            <option value="mi">Mil (mi)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <button type="button" id="convertBtn">Konversi</button>
+
+            <div class="result" id="result">
+                <p>Hasil konversi akan muncul di sini</p>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <h3>Satuan yang Tersedia:</h3>
+            <div class="units-grid">
+                <div class="unit-item">
+                    <strong>mm</strong> - Milimeter
+                </div>
+                <div class="unit-item">
+                    <strong>cm</strong> - Centimeter
+                </div>
+                <div class="unit-item">
+                    <strong>m</strong> - Meter
+                </div>
+                <div class="unit-item">
+                    <strong>km</strong> - Kilometer
+                </div>
+                <div class="unit-item">
+                    <strong>in</strong> - Inchi
+                </div>
+                <div class="unit-item">
+                    <strong>ft</strong> - Kaki (Feet)
+                </div>
+                <div class="unit-item">
+                    <strong>yd</strong> - Yard
+                </div>
+                <div class="unit-item">
+                    <strong>mi</strong> - Mil (Mile)
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('convertBtn').addEventListener('click', function() {
+            const value = parseFloat(document.getElementById('value').value);
+            const fromUnit = document.getElementById('from_unit').value;
+            const toUnit = document.getElementById('to_unit').value;
+            const resultDiv = document.getElementById('result');
+
+            if (isNaN(value)) {
+                resultDiv.innerHTML = '<p class="error">Masukkan angka yang valid</p>';
+                return;
+            }
+
+            fetch('/convert', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    value: value,
+                    from_unit: fromUnit,
+                    to_unit: toUnit
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    resultDiv.innerHTML = `<p class="success">${data.message}</p>`;
+                } else {
+                    resultDiv.innerHTML = `<p class="error">${data.message}</p>`;
+                }
+            })
+            .catch(error => {
+                resultDiv.innerHTML = '<p class="error">Terjadi kesalahan</p>';
+            });
+        });
+
+        document.getElementById('swapUnits').addEventListener('click', function() {
+            const fromUnit = document.getElementById('from_unit');
+            const toUnit = document.getElementById('to_unit');
+            
+            const temp = fromUnit.value;
+            fromUnit.value = toUnit.value;
+            toUnit.value = temp;
+        });
+
+        // Konversi otomatis saat input berubah
+        document.getElementById('value').addEventListener('input', function() {
+            document.getElementById('convertBtn').click();
+        });
+
+        document.getElementById('from_unit').addEventListener('change', function() {
+            document.getElementById('convertBtn').click();
+        });
+
+        document.getElementById('to_unit').addEventListener('change', function() {
+            document.getElementById('convertBtn').click();
+        });
+
+        // Konversi pertama kali saat halaman dimuat
+        document.getElementById('convertBtn').click();
+    </script>
+</body>
+</html>
